@@ -9,11 +9,20 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "googleapis": "^148.0.0",
     "node-cache": "^5.1.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Momena-akhtar/timeslot-memory-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Momena-akhtar/timeslot-memory-backend/issues"
+  },
+  "homepage": "https://github.com/Momena-akhtar/timeslot-memory-backend#readme",
+  "description": ""
 }

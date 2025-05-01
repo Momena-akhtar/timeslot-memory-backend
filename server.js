@@ -1,48 +1,29 @@
-const express = require('express');
-const NodeCache = require('node-cache');
-const cors = require('cors');
+// server.js
 require('dotenv').config();
+const express = require('express');
+const { fetchUnavailableSlots } = require('./googleCalender');
+const { isCacheValid, getCachedData, updateCache } = require('./cache');
 
 const app = express();
-app.use(express.json());
-app.use(cors());
+const PORT = process.env.PORT || 5000;
 
-// Cache with 5 min TTL
-const cache = new NodeCache({ stdTTL: 300 });
-
-app.post('/check-slots', async (req, res) => {
-    const { userId } = req.body;
-
-    if (!userId) {
-        return res.status(400).json({ error: 'userId is required' });
+app.get('/unavailable-slots', async (req, res) => {
+  try {
+    if (isCacheValid()) {
+      console.log('✅ Returning cached unavailable slots');
+      return res.json({ cached: true, slots: getCachedData() });
     }
 
-    const cachedData = cache.get(userId);
-
-    if (cachedData) {
-        console.log(`Serving cached data for user ${userId}`);
-        return res.json({ source: 'cache', unavailableSlots: cachedData });
-    }
-
-    // Simulate fetching from real calendar API
-    const fetchedSlots = await getUnavailableSlotsFromRealAPI();
-
-    cache.set(userId, fetchedSlots);
-
-    console.log(`Fetched new data for user ${userId}`);
-    res.json({ source: 'fresh', unavailableSlots: fetchedSlots });
+    const slots = await fetchUnavailableSlots();
+    updateCache(slots);
+    console.log('🌐 Fetched fresh unavailable slots from Google Calendar');
+    res.json({ cached: false, slots });
+  } catch (err) {
+    console.error('❌ Error:', err);
+    res.status(500).send('Server Error');
+  }
 });
 
-// Mock function (replace with real API call logic later)
-async function getUnavailableSlotsFromRealAPI() {
-    return ["2025-04-30T09:00", "2025-04-30T13:00"]; // Example dummy data
-}
-
-const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
-
-//dev: Momena Akhtar (2025)
-
-
